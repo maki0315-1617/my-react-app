@@ -32,8 +32,8 @@ function App() {
 
   // クリックイベント
   const handleClick = () => {
-    setCount((prev) => prev + 1);
-  };
+    setCount((prevCount) => prevCount + 1);
+  };  
 
   // マウスイベント
   const handleMouseEnter = () => {

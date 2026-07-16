@@ -36,6 +36,7 @@ h1 {
   left: 20px;
   animation: walk 5s linear infinite;
   cursor: pointer;
+  filter: drop-shadow(2px 4px 4px rgba(0, 0, 0, 0.4)); /* ← 追加 */
 }
 
 @keyframes walk {
