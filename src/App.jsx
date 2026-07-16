@@ -137,12 +137,11 @@ function App() {
     }
   };
 
-  // 偽物ロン君クリック（減点）
+  // 偽物ロン君クリック（減点のみ）
   const handleFakeCatClick = () => {
     if (!gameStarted || gameEnded) return;
 
     setClickCount((prev) => prev - 1);
-    alert("偽物のロン君です！ -1 点");
   };
 
   // タイマー処理
@@ -276,7 +275,7 @@ function App() {
               style={{ width: "120px", cursor: "pointer" }}
             />
 
-            {/* 偽物ロン君 */}
+            {/* 偽物ロン君（本物と同じ動き） */}
             {fakeCats.map((cat) => (
               <img
                 key={cat.id}
