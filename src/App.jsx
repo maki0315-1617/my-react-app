@@ -43,10 +43,11 @@ function App() {
     }
   }, []);
 
-  // 履歴保存（最新5件に制限）
+  // 履歴保存（最新5件）
   const saveHistory = (result, target, clicks) => {
     const newRecord = {
       date: new Date().toLocaleString(),
+      difficulty,
       result,
       target,
       clicks,
@@ -229,7 +230,7 @@ function App() {
             ゲームスタート
           </button>
 
-          {/* ★ 過去の勝敗数（表形式） */}
+          {/* ★ 過去の勝敗（表形式） */}
           <h2>過去の勝敗（最新5件）</h2>
 
           {history.length === 0 && <p>履歴はまだありません</p>}
@@ -240,6 +241,7 @@ function App() {
                 <thead>
                   <tr>
                     <th>ゲーム日時</th>
+                    <th>難易度</th>
                     <th>勝敗</th>
                     <th>目標回数</th>
                     <th>クリック回数</th>
@@ -249,6 +251,7 @@ function App() {
                   {history.map((h, index) => (
                     <tr key={index}>
                       <td>{h.date}</td>
+                      <td>{h.difficulty}</td>
                       <td>{h.result}</td>
                       <td>{h.target}</td>
                       <td>{h.clicks}</td>
@@ -282,7 +285,6 @@ function App() {
       {/* ゲーム画面 */}
       {!showTitle && !showResult && (
         <>
-          {/* ゲーム中 */}
           {gameStarted && (
             <>
               <h2>目標クリック回数：{targetCount} 回</h2>
