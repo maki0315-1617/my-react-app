@@ -292,7 +292,72 @@ function App() {
                 onClick={handleFakeCatClick}
               />
             ))}
-          </div>
+          </div>import React, { useState, useEffect } from "react";
+import "./App.css";
+
+function App() {
+  // タイトル画面
+  const [showTitle, setShowTitle] = useState(true);
+
+  // ゲーム状態
+  const [gameStarted, setGameStarted] = useState(false);
+  const [gameEnded, setGameEnded] = useState(false);
+
+  // 難易度
+  const [difficulty, setDifficulty] = useState("Easy");
+
+  // 本物・偽物・カウント
+  const [targetCount, setTargetCount] = useState(null);
+  const [clickCount, setClickCount] = useState(0);
+  const [timer, setTimer] = useState(10);
+  const [isJumping, setIsJumping] = useState(false);
+
+  // 偽物ロン君
+  const [fakeCats, setFakeCats] = useState([]);
+
+  // 履歴（localStorage）
+  const [history, setHistory] = useState([]);
+
+  // 難易度ごとの偽物出現頻度（秒）
+  const fakeSpawnIntervalMap = {
+    Easy: 4,
+    Normal: 2,
+    Hard: 1,
+  };
+
+  // 初回ロード時に履歴読み込み
+  useEffect(() => {
+    const saved = localStorage.getItem("ronkun-history");
+    if (saved) {
+      setHistory(JSON.parse(saved));
+    }
+  }, []);
+
+  // 履歴保存
+  const saveHistory = (result, target, clicks) => {
+    const newRecord = {
+      date: new Date().toLocaleString(),
+      result,
+      target,
+      clicks,
+    };
+
+    const updated = [newRecord, ...history].slice(0, 5);
+    setHistory(updated);
+    localStorage.setItem("ronkun-history", JSON.stringify(updated));
+  };
+
+  // 勝率計算
+  const winRate = (() => {
+    if (history.length === 0) return 0;
+    const wins = history.filter((h) => h.result === "勝ち").length;
+    return Math.round((wins / history.length) * 100);
+  })();
+
+  // ランキング（勝利の中で目標回数が多い順）
+  const ranking = (() => {
+    const wins = history.filter((h) => h.result === "勝ち");
+    return wins.sort((a, b
 
           <p>※ 黒猫ロン君をクリックして回数を稼いでください！</p>
         </>
