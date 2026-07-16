@@ -67,3 +67,24 @@ h1 {
   align-items: center;
   justify-content: center;
 }
+
+/* 左→右へ移動アニメーション */
+.move-left-right {
+  animation: moveLR 4s linear forwards;
+}
+
+@keyframes moveLR {
+  0% { transform: translateX(-100px); }
+  100% { transform: translateX(120vw); }
+}
+
+/* ジャンプアニメーション */
+.jump {
+  animation: jumpAnim 0.3s ease;
+}
+
+@keyframes jumpAnim {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-30px); }
+  100% { transform: translateY(0); }
+}

@@ -60,26 +60,25 @@ function App() {
     return Math.round((wins / history.length) * 100);
   })();
 
-  // ランキング（勝利の中で目標回数が多い順）
+  // ランキング
   const ranking = (() => {
     const wins = history.filter((h) => h.result === "勝ち");
     return wins.sort((a, b) => b.target - a.target);
   })();
 
-  // 偽物ロン君生成（本物と同じ動き + 左→右移動）
+  // 偽物ロン君生成（CSSアニメーションで左→右へ移動）
   const spawnFakeCat = () => {
     const id = Math.random().toString(36).substring(2, 9);
 
     const fake = {
       id,
-      left: "-100px", // 左端からスタート
       top: Math.random() * 60 + "%", // ランダム縦位置
       jumping: false,
     };
 
     setFakeCats((prev) => [...prev, fake]);
 
-    // 偽物ジャンプ開始
+    // ジャンプ開始
     setTimeout(() => {
       setFakeCats((prev) =>
         prev.map((cat) =>
@@ -88,7 +87,7 @@ function App() {
       );
     }, 100);
 
-    // 偽物ジャンプ解除
+    // ジャンプ解除
     setTimeout(() => {
       setFakeCats((prev) =>
         prev.map((cat) =>
@@ -97,22 +96,10 @@ function App() {
       );
     }, 1000);
 
-    // 左→右へ移動（スマホ対応）
-    let pos = -100;
-    const moveInterval = setInterval(() => {
-      pos += window.innerWidth < 600 ? 3 : 5; // スマホは速度調整
-
-      setFakeCats((prev) =>
-        prev.map((cat) =>
-          cat.id === id ? { ...cat, left: pos + "px" } : cat
-        )
-      );
-
-      if (pos > window.innerWidth) {
-        clearInterval(moveInterval);
-        setFakeCats((prev) => prev.filter((cat) => cat.id !== id));
-      }
-    }, 50);
+    // 4秒後に削除
+    setTimeout(() => {
+      setFakeCats((prev) => prev.filter((cat) => cat.id !== id));
+    }, 4000);
   };
 
   // 偽物出現タイマー
@@ -144,6 +131,7 @@ function App() {
     setTargetCount(random);
 
     setTimer(10);
+    setFakeCats([]);
   };
 
   // 本物ロン君クリック
@@ -211,7 +199,7 @@ function App() {
     setClickCount(0);
     setTimer(10);
     setFakeCats([]);
-    setShowTitle(true); // タイトル画面に戻る
+    setShowTitle(true);
   };
 
   return (
@@ -222,11 +210,7 @@ function App() {
         <div className="title-screen">
           <h1 className="title-logo">黒猫ロン君クリックゲーム</h1>
 
-          <img
-            src="/ronkun.png"
-            alt="黒猫ロン君"
-            className="title-cat"
-          />
+          <img src="/ronkun.png" alt="黒猫ロン君" className="title-cat" />
 
           <h2>難易度選択</h2>
           <select
@@ -245,7 +229,7 @@ function App() {
         </div>
       )}
 
-      {/* タイトル画面が消えたらゲーム画面 */}
+      {/* ゲーム画面 */}
       {!showTitle && (
         <>
           {/* 履歴テーブル */}
@@ -300,3 +284,53 @@ function App() {
               <h2>目標クリック回数：{targetCount} 回</h2>
               <h3>残り時間：{timer} 秒</h3>
               <h3>あなたのクリック回数：{clickCount} 回</h3>
+
+              <div
+                className="scroll-background"
+                style={{ position: "relative", height: "300px" }}
+              >
+                {/* 本物ロン君 */}
+                <img
+                  src="/ronkun.png"
+                  alt="黒猫ロン君"
+                  className={`cat-image ${isJumping ? "jump" : ""}`}
+                  onClick={handleCatClick}
+                  style={{
+                    width: window.innerWidth < 600 ? "80px" : "120px",
+                    cursor: "pointer",
+                    position: "absolute",
+                    left: "20px",
+                    bottom: "20px",
+                  }}
+                />
+
+                {/* 偽物ロン君（CSSアニメーションで左→右へ移動） */}
+                {fakeCats.map((cat) => (
+                  <img
+                    key={cat.id}
+                    src="/fake-ronkun.svg"
+                    alt="偽物ロン君"
+                    className={`fake-cat move-left-right ${cat.jumping ? "jump" : ""}`}
+                    style={{
+                      position: "absolute",
+                      top: cat.top,
+                      width: window.innerWidth < 600 ? "60px" : "80px",
+                      cursor: "pointer",
+                    }}
+                    onClick={handleFakeCatClick}
+                  />
+                ))}
+              </div>
+
+              <p>※ 黒猫ロン君をクリックして回数を稼いでください！</p>
+            </>
+          )}
+
+          {gameEnded && !gameStarted && <p>ゲームを終了しました。</p>}
+        </>
+      )}
+    </div>
+  );
+}
+
+export default App;
