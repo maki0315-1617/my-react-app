@@ -1,3 +1,4 @@
+/* 全体レイアウト */
 .app {
   font-family: system-ui, sans-serif;
   text-align: center;
@@ -6,10 +7,42 @@
   padding-top: 40px;
 }
 
+/* タイトル */
 h1 {
   color: #ffd700;
   text-shadow: 2px 2px 4px #333;
   margin-bottom: 40px;
+}
+
+/* タイトル画面 */
+.title-screen {
+  text-align: center;
+  padding: 20px;
+}
+
+.title-logo {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.title-cat {
+  width: 150px;
+  margin-bottom: 20px;
+}
+
+.difficulty-select {
+  padding: 10px;
+  font-size: 1rem;
+  margin-bottom: 20px;
+}
+
+.start-btn {
+  padding: 12px 20px;
+  font-size: 1.2rem;
+  background: #ffd700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
 /* 冒険風スクロール背景 */
@@ -28,7 +61,7 @@ h1 {
   100% { background-position: -1000px 0; }
 }
 
-/* 黒猫ロン君 */
+/* 黒猫ロン君（本物） */
 .cat-image {
   width: 140px;
   position: absolute;
@@ -36,7 +69,7 @@ h1 {
   left: 20px;
   animation: walk 5s linear infinite;
   cursor: pointer;
-  filter: drop-shadow(2px 4px 4px rgba(0, 0, 0, 0.4)); /* ← 追加 */
+  filter: drop-shadow(2px 4px 4px rgba(0, 0, 0, 0.4));
 }
 
 @keyframes walk {
@@ -44,18 +77,31 @@ h1 {
   100% { transform: translateX(600px); }
 }
 
-/* ジャンプアニメーション */
+/* ジャンプアニメーション（本物 & 偽物共通） */
 .jump {
   animation: jumpAnim 0.6s ease-out;
 }
 
 @keyframes jumpAnim {
-  0% { bottom: 10px; }
-  50% { bottom: 80px; }
-  100% { bottom: 10px; }
+  0% { bottom: 10px; transform: translateY(0); }
+  50% { bottom: 80px; transform: translateY(-30px); }
+  100% { bottom: 10px; transform: translateY(0); }
 }
 
-/* ホバーエリア */
+/* 偽物ロン君（左→右へ移動） */
+.fake-cat {
+  position: absolute;
+  left: -100px;
+  animation: moveLR 4s linear forwards;
+  filter: drop-shadow(2px 4px 4px rgba(0, 0, 0, 0.4));
+}
+
+@keyframes moveLR {
+  0% { transform: translateX(-100px); }
+  100% { transform: translateX(120vw); }
+}
+
+/* ホバーエリア（使う場合） */
 .hover-box {
   width: 200px;
   height: 100px;
@@ -68,23 +114,30 @@ h1 {
   justify-content: center;
 }
 
-/* 左→右へ移動アニメーション */
-.move-left-right {
-  animation: moveLR 4s linear forwards;
-}
+/* スマホ対応 */
+@media (max-width: 600px) {
+  .title-logo {
+    font-size: 1.5rem;
+  }
 
-@keyframes moveLR {
-  0% { transform: translateX(-100px); }
-  100% { transform: translateX(120vw); }
-}
+  .title-cat {
+    width: 120px;
+  }
 
-/* ジャンプアニメーション */
-.jump {
-  animation: jumpAnim 0.3s ease;
-}
+  .start-btn {
+    padding: 10px 16px;
+    font-size: 1rem;
+  }
 
-@keyframes jumpAnim {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-30px); }
-  100% { transform: translateY(0); }
+  .cat-image {
+    width: 90px;
+  }
+
+  .fake-cat {
+    width: 70px;
+  }
+
+  table {
+    font-size: 0.8rem;
+  }
 }
