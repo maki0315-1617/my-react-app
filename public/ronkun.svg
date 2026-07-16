@@ -1,0 +1,25 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="256" cy="256" r="240" fill="#000000" stroke="#333" stroke-width="12"/>
+  
+  <!-- Ears -->
+  <polygon points="140,120 200,40 240,140" fill="#000"/>
+  <polygon points="372,120 312,40 272,140" fill="#000"/>
+
+  <!-- Eyes -->
+  <ellipse cx="190" cy="250" rx="45" ry="55" fill="#ffffff"/>
+  <ellipse cx="322" cy="250" rx="45" ry="55" fill="#ffffff"/>
+  <circle cx="190" cy="250" r="25" fill="#000000"/>
+  <circle cx="322" cy="250" r="25" fill="#000000"/>
+
+  <!-- Nose -->
+  <circle cx="256" cy="310" r="18" fill="#ff66aa"/>
+
+  <!-- Mouth -->
+  <path d="M230 340 Q256 360 282 340" stroke="#ff66aa" stroke-width="8" fill="none"/>
+
+  <!-- Whiskers -->
+  <line x1="120" y1="300" x2="200" y2="310" stroke="#ffffff" stroke-width="6"/>
+  <line x1="120" y1="330" x2="200" y2="320" stroke="#ffffff" stroke-width="6"/>
+  <line x1="392" y1="300" x2="312" y2="310" stroke="#ffffff" stroke-width="6"/>
+  <line x1="392" y1="330" x2="312" y2="320" stroke="#ffffff" stroke-width="6"/>
+</svg>

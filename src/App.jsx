@@ -2,19 +2,33 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 
 function App() {
+  // ゲーム状態
   const [gameStarted, setGameStarted] = useState(false);
+  const [gameEnded, setGameEnded] = useState(false);
+
+  // 難易度
+  const [difficulty, setDifficulty] = useState("Easy");
+
+  // 本物・偽物・カウント
   const [targetCount, setTargetCount] = useState(null);
   const [clickCount, setClickCount] = useState(0);
   const [timer, setTimer] = useState(10);
   const [isJumping, setIsJumping] = useState(false);
-  const [gameEnded, setGameEnded] = useState(false);
 
-  // ★ localStorage の履歴
+  // 偽物ロン君
+  const [fakeCats, setFakeCats] = useState([]);
+
+  // 履歴（localStorage）
   const [history, setHistory] = useState([]);
 
-  // -----------------------------
-  // 初回ロード時に localStorage から履歴を読み込む
-  // -----------------------------
+  // 難易度ごとの偽物数
+  const fakeCountMap = {
+    Easy: 1,
+    Normal: 3,
+    Hard: 6,
+  };
+
+  // 初回ロード時に履歴読み込み
   useEffect(() => {
     const saved = localStorage.getItem("ronkun-history");
     if (saved) {
@@ -22,9 +36,7 @@ function App() {
     }
   }, []);
 
-  // -----------------------------
-  // 履歴を localStorage に保存
-  // -----------------------------
+  // 履歴保存
   const saveHistory = (result, target, clicks) => {
     const newRecord = {
       date: new Date().toLocaleString(),
@@ -33,31 +45,41 @@ function App() {
       clicks,
     };
 
-    const updated = [newRecord, ...history].slice(0, 5); // 最新5件だけ保持
+    const updated = [newRecord, ...history].slice(0, 5);
     setHistory(updated);
     localStorage.setItem("ronkun-history", JSON.stringify(updated));
   };
 
-  // -----------------------------
   // 勝率計算
-  // -----------------------------
   const winRate = (() => {
     if (history.length === 0) return 0;
     const wins = history.filter((h) => h.result === "勝ち").length;
     return Math.round((wins / history.length) * 100);
   })();
 
-  // -----------------------------
-  // ランキング（勝ち数の多い順）
-  // -----------------------------
+  // ランキング（勝利の中で目標回数が多い順）
   const ranking = (() => {
     const wins = history.filter((h) => h.result === "勝ち");
-    return wins.sort((a, b) => b.target - a.target); // 目標回数が多い勝利を上位に
+    return wins.sort((a, b) => b.target - a.target);
   })();
 
-  // -----------------------------
+  // 偽物ロン君生成
+  const generateFakeCats = () => {
+    const count = fakeCountMap[difficulty];
+    const arr = [];
+
+    for (let i = 0; i < count; i++) {
+      arr.push({
+        id: i,
+        left: Math.random() * 80 + "%",
+        top: Math.random() * 60 + "%",
+      });
+    }
+
+    return arr;
+  };
+
   // ゲーム開始
-  // -----------------------------
   const startGame = () => {
     setGameStarted(true);
     setGameEnded(false);
@@ -67,11 +89,12 @@ function App() {
     setTargetCount(random);
 
     setTimer(10);
+
+    // 偽物生成
+    setFakeCats(generateFakeCats());
   };
 
-  // -----------------------------
-  // ロン君クリック
-  // -----------------------------
+  // 本物ロン君クリック
   const handleCatClick = () => {
     if (!gameStarted || gameEnded) return;
 
@@ -83,9 +106,15 @@ function App() {
     }
   };
 
-  // -----------------------------
+  // 偽物ロン君クリック（減点）
+  const handleFakeCatClick = () => {
+    if (!gameStarted || gameEnded) return;
+
+    setClickCount((prev) => prev - 1);
+    alert("偽物のロン君です！ -1 点");
+  };
+
   // タイマー処理
-  // -----------------------------
   useEffect(() => {
     if (!gameStarted || gameEnded) return;
 
@@ -101,9 +130,7 @@ function App() {
     return () => clearInterval(interval);
   }, [gameStarted, timer, gameEnded]);
 
-  // -----------------------------
   // ゲーム終了判定
-  // -----------------------------
   const finishGame = () => {
     setGameEnded(true);
 
@@ -126,25 +153,31 @@ function App() {
     }
   };
 
-  // -----------------------------
-  // ゲーム終了（画面クリア）
-  // -----------------------------
+  // ゲーム終了
   const endGame = () => {
     setGameStarted(false);
     setGameEnded(true);
     setTargetCount(null);
     setClickCount(0);
     setTimer(10);
+    setFakeCats([]);
   };
 
-  // -----------------------------
-  // UI
-  // -----------------------------
   return (
     <div className="app">
       <h1>黒猫ロン君クリックゲーム</h1>
 
-      {/* ★ 履歴テーブル表示 */}
+      {/* 難易度選択 */}
+      <section>
+        <h2>難易度選択</h2>
+        <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
+          <option value="Easy">Easy（簡単）</option>
+          <option value="Normal">Normal（普通）</option>
+          <option value="Hard">Hard（難しい）</option>
+        </select>
+      </section>
+
+      {/* 履歴テーブル */}
       <section>
         <h2>過去の勝敗履歴（最新5件）</h2>
 
@@ -173,10 +206,8 @@ function App() {
           </table>
         )}
 
-        {/* ★ 勝率表示 */}
         <h3>勝率：{winRate}%</h3>
 
-        {/* ★ ランキング表示 */}
         <h2>勝利ランキング（目標回数が多い順）</h2>
         {ranking.length === 0 && <p>勝利履歴がありません</p>}
         {ranking.length > 0 && (
@@ -197,20 +228,40 @@ function App() {
         </button>
       )}
 
-      {/* ゲーム中の表示 */}
+      {/* ゲーム中 */}
       {gameStarted && (
         <>
           <h2>目標クリック回数：{targetCount} 回</h2>
           <h3>残り時間：{timer} 秒</h3>
           <h3>あなたのクリック回数：{clickCount} 回</h3>
 
-          <div className="scroll-background">
+          <div className="scroll-background" style={{ position: "relative" }}>
+            {/* 本物ロン君 */}
             <img
               src="/ronkun.png"
               alt="黒猫ロン君"
               className={`cat-image ${isJumping ? "jump" : ""}`}
               onClick={handleCatClick}
+              style={{ width: "120px", cursor: "pointer" }}
             />
+
+            {/* 偽物ロン君 */}
+            {fakeCats.map((cat) => (
+              <img
+                key={cat.id}
+                src="/fake-ronkun.png"
+                alt="偽物ロン君"
+                className="fake-cat"
+                style={{
+                  position: "absolute",
+                  left: cat.left,
+                  top: cat.top,
+                  width: "80px",
+                  cursor: "pointer",
+                }}
+                onClick={handleFakeCatClick}
+              />
+            ))}
           </div>
 
           <p>※ 黒猫ロン君をクリックして回数を稼いでください！</p>
