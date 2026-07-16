@@ -43,7 +43,7 @@ function App() {
     }
   }, []);
 
-  // 履歴保存
+  // 履歴保存（最新5件に制限）
   const saveHistory = (result, target, clicks) => {
     const newRecord = {
       date: new Date().toLocaleString(),
@@ -52,7 +52,7 @@ function App() {
       clicks,
     };
 
-    const updated = [newRecord, ...history].slice(0, 20);
+    const updated = [newRecord, ...history].slice(0, 5);
     setHistory(updated);
     localStorage.setItem("ronkun-history", JSON.stringify(updated));
   };
@@ -65,12 +65,6 @@ function App() {
   const winRate = (() => {
     if (history.length === 0) return 0;
     return Math.round((winCount / history.length) * 100);
-  })();
-
-  // ランキング
-  const ranking = (() => {
-    const wins = history.filter((h) => h.result === "勝ち");
-    return wins.sort((a, b) => b.target - a.target);
   })();
 
   // 偽物ロン君生成（左→右へ移動）
@@ -235,9 +229,38 @@ function App() {
             ゲームスタート
           </button>
 
-          {/* ★ 過去の勝敗数（タイトル画面だけに表示） */}
-          <h3>過去の勝敗数</h3>
-          <p>勝ち：{winCount} 回 / 負け：{loseCount} 回</p>
+          {/* ★ 過去の勝敗数（表形式） */}
+          <h2>過去の勝敗（最新5件）</h2>
+
+          {history.length === 0 && <p>履歴はまだありません</p>}
+
+          {history.length > 0 && (
+            <div style={{ overflowX: "auto" }}>
+              <table className="history-table">
+                <thead>
+                  <tr>
+                    <th>ゲーム日時</th>
+                    <th>勝敗</th>
+                    <th>目標回数</th>
+                    <th>クリック回数</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.map((h, index) => (
+                    <tr key={index}>
+                      <td>{h.date}</td>
+                      <td>{h.result}</td>
+                      <td>{h.target}</td>
+                      <td>{h.clicks}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* ★ 勝率（表の外） */}
+          <h3>勝率：{winRate}%</h3>
         </div>
       )}
 
@@ -259,52 +282,6 @@ function App() {
       {/* ゲーム画面 */}
       {!showTitle && !showResult && (
         <>
-          {/* 履歴テーブル */}
-          <section>
-            <h2>過去の勝敗履歴（最新20件）</h2>
-
-            {history.length === 0 && <p>履歴はまだありません</p>}
-
-            {history.length > 0 && (
-              <div style={{ overflowX: "auto" }}>
-                <table border="1" style={{ width: "100%", marginBottom: "20px" }}>
-                  <thead>
-                    <tr>
-                      <th>日時</th>
-                      <th>勝敗</th>
-                      <th>目標回数</th>
-                      <th>クリック回数</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {history.map((h, index) => (
-                      <tr key={index}>
-                        <td>{h.date}</td>
-                        <td>{h.result}</td>
-                        <td>{h.target}</td>
-                        <td>{h.clicks}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            <h3>勝率：{winRate}%</h3>
-
-            <h2>勝利ランキング（目標回数が多い順）</h2>
-            {ranking.length === 0 && <p>勝利履歴がありません</p>}
-            {ranking.length > 0 && (
-              <ul>
-                {ranking.map((r, index) => (
-                  <li key={index}>
-                    {index + 1}位：{r.date} / 目標 {r.target}回 / 達成 {r.clicks}回
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
           {/* ゲーム中 */}
           {gameStarted && (
             <>
