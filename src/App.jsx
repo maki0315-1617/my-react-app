@@ -77,12 +77,17 @@ function App() {
   // -----------------------------
   // useEffect：入力監視（暴走しない別方式）
   // -----------------------------
+ // useEffect：入力監視（修正版）
   useEffect(() => {
-    if (text.trim() !== "") {
-      setInputLog((prev) => [...prev, `入力: ${text}`]);
-    }
+    // 空文字や空白だけのときは何もしない
+    if (!text || text.trim() === "") return;
+    setInputLog((prev) => {
+      const next = [...prev, `入力: ${text}`];
+      // ログが増えすぎて重くならないように、最新50件だけ保持
+      return next.slice(-50);
+    });
   }, [text]);
-
+ 
   // -----------------------------
   // useEffect：マウス監視
   // -----------------------------
