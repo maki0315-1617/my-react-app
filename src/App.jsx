@@ -1,50 +1,27 @@
 // ロン君のReactAPP作成
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 
 function App() {
-  // テキスト入力の状態
   const [text, setText] = useState("");
-
-  // カウント（クリックイベント）
   const [count, setCount] = useState(0);
-
-  // マウスイベントの状態
   const [mouseMessage, setMouseMessage] = useState("カーソルを乗せてみてください");
-
-  // 入力監視ログ
   const [inputLog, setInputLog] = useState([]);
-
-  // マウス監視ログ
   const [mouseLog, setMouseLog] = useState([]);
-
-  // ジャンプ状態
   const [isJumping, setIsJumping] = useState(false);
-
-  // 前回の入力値を保持（別方式のポイント）
-  const prevTextRef = useRef("");
 
   // -----------------------------
   // イベントハンドラ
   // -----------------------------
 
-  // テキスト入力イベント（別方式）
+  // テキスト入力イベント（安全版）
   const handleChange = (e) => {
-    const value = e.target.value;
-    setText(value);
-
-    // 前回値と比較して変化があればカウントアップ
-    if (value !== prevTextRef.current && value.trim() !== "") {
-      setCount((prev) => prev + 1);
-    }
-
-    // 前回値を更新
-    prevTextRef.current = value;
+    setText(e.target.value);
   };
 
-  // クリックイベント
+  // クリックイベント（カウントアップ）
   const handleClick = () => {
-    setCount((prevCount) => prevCount + 1);
+    setCount((prev) => prev + 1);
   };
 
   // マウスイベント
@@ -56,16 +33,6 @@ function App() {
     setMouseMessage("マウスが離れました");
   };
 
-  // 入力ログをクリアするイベント
-  const clearInputLog = () => {
-    setInputLog([]);
-  };
-
-  // マウスログをクリアするイベント
-  const clearMouseLog = () => {
-    setMouseLog([]);
-  };
-
   // ジャンプイベント
   const jump = () => {
     if (!isJumping) {
@@ -75,21 +42,19 @@ function App() {
   };
 
   // -----------------------------
-  // useEffect：入力監視（暴走しない別方式）
+  // useEffect：入力ログ（暴走しない版）
   // -----------------------------
- // useEffect：入力監視（修正版）
   useEffect(() => {
-    // 空文字や空白だけのときは何もしない
-    if (!text || text.trim() === "") return;
+    if (text.trim() === "") return; // 空文字は無視
+
     setInputLog((prev) => {
       const next = [...prev, `入力: ${text}`];
-      // ログが増えすぎて重くならないように、最新50件だけ保持
-      return next.slice(-50);
+      return next.slice(-50); // 最新50件だけ保持
     });
   }, [text]);
- 
+
   // -----------------------------
-  // useEffect：マウス監視
+  // useEffect：マウスログ
   // -----------------------------
   useEffect(() => {
     setMouseLog((prev) => [...prev, `状態: ${mouseMessage}`]);
@@ -154,7 +119,7 @@ function App() {
         <h2>4. useEffect による監視ログ</h2>
 
         <h3>入力ログ</h3>
-        <button onClick={clearInputLog}>入力ログをクリアする</button>
+        <button onClick={() => setInputLog([])}>入力ログをクリアする</button>
         <ul>
           {inputLog.map((log, index) => (
             <li key={index}>{log}</li>
@@ -162,7 +127,7 @@ function App() {
         </ul>
 
         <h3>マウスログ</h3>
-        <button onClick={clearMouseLog}>マウスログをクリアする</button>
+        <button onClick={() => setMouseLog([])}>マウスログをクリアする</button>
         <ul>
           {mouseLog.map((log, index) => (
             <li key={index}>{log}</li>
