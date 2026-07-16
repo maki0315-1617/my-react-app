@@ -21,11 +21,11 @@ function App() {
   // 履歴（localStorage）
   const [history, setHistory] = useState([]);
 
-  // 難易度ごとの偽物数
-  const fakeCountMap = {
-    Easy: 1,
-    Normal: 3,
-    Hard: 6,
+  // 難易度ごとの偽物出現頻度（秒）
+  const fakeSpawnIntervalMap = {
+    Easy: 4,
+    Normal: 2,
+    Hard: 1,
   };
 
   // 初回ロード時に履歴読み込み
@@ -63,21 +63,55 @@ function App() {
     return wins.sort((a, b) => b.target - a.target);
   })();
 
-  // 偽物ロン君生成
-  const generateFakeCats = () => {
-    const count = fakeCountMap[difficulty];
-    const arr = [];
+  // 偽物ロン君生成（本物と同じ動き）
+  const spawnFakeCat = () => {
+    const id = Math.random().toString(36).substring(2, 9);
 
-    for (let i = 0; i < count; i++) {
-      arr.push({
-        id: i,
-        left: Math.random() * 80 + "%",
-        top: Math.random() * 60 + "%",
-      });
-    }
+    const fake = {
+      id,
+      left: Math.random() * 80 + "%",
+      top: Math.random() * 60 + "%",
+      jumping: false,
+    };
 
-    return arr;
+    setFakeCats((prev) => [...prev, fake]);
+
+    // 偽物もジャンプする
+    setTimeout(() => {
+      setFakeCats((prev) =>
+        prev.map((cat) =>
+          cat.id === id ? { ...cat, jumping: true } : cat
+        )
+      );
+    }, 100);
+
+    // 1秒後にジャンプ解除
+    setTimeout(() => {
+      setFakeCats((prev) =>
+        prev.map((cat) =>
+          cat.id === id ? { ...cat, jumping: false } : cat
+        )
+      );
+    }, 1000);
+
+    // 3秒後に消える
+    setTimeout(() => {
+      setFakeCats((prev) => prev.filter((cat) => cat.id !== id));
+    }, 3000);
   };
+
+  // 偽物出現タイマー
+  useEffect(() => {
+    if (!gameStarted || gameEnded) return;
+
+    const intervalSec = fakeSpawnIntervalMap[difficulty];
+
+    const interval = setInterval(() => {
+      spawnFakeCat();
+    }, intervalSec * 1000);
+
+    return () => clearInterval(interval);
+  }, [gameStarted, gameEnded, difficulty]);
 
   // ゲーム開始
   const startGame = () => {
@@ -89,9 +123,6 @@ function App() {
     setTargetCount(random);
 
     setTimer(10);
-
-    // 偽物生成
-    setFakeCats(generateFakeCats());
   };
 
   // 本物ロン君クリック
@@ -251,7 +282,7 @@ function App() {
                 key={cat.id}
                 src="/fake-ronkun.png"
                 alt="偽物ロン君"
-                className="fake-cat"
+                className={`fake-cat ${cat.jumping ? "jump" : ""}`}
                 style={{
                   position: "absolute",
                   left: cat.left,
