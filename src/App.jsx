@@ -1,118 +1,131 @@
-// ロン君のReactAPP作成
 import React, { useState, useEffect } from "react";
 import "./App.css";
 
 function App() {
-  const [text, setText] = useState("");
-  const [count, setCount] = useState(0);
-  const [mouseMessage, setMouseMessage] = useState("カーソルを乗せてみてください");
-  const [mouseLog, setMouseLog] = useState([]);
+  const [gameStarted, setGameStarted] = useState(false);
+  const [targetCount, setTargetCount] = useState(null); // ランダム回数
+  const [clickCount, setClickCount] = useState(0); // ロン君クリック回数
+  const [timer, setTimer] = useState(10); // 10秒タイマー
   const [isJumping, setIsJumping] = useState(false);
+  const [gameEnded, setGameEnded] = useState(false);
 
   // -----------------------------
-  // イベントハンドラ
+  // ゲーム開始
   // -----------------------------
+  const startGame = () => {
+    setGameStarted(true);
+    setGameEnded(false);
+    setClickCount(0);
 
-  // テキスト入力イベント（安全版）
-  const handleChange = (e) => {
-    setText(e.target.value);
-  };
-  
-  //カウントアップ
-  const handleClick = () => {
-    setCount((c) => c + 1);
-  };
+    const random = Math.floor(Math.random() * 10) + 1; // 1〜10回
+    setTargetCount(random);
 
-  // マウスイベント
-  const handleMouseEnter = () => {
-    setMouseMessage("マウスが乗りました！");
+    setTimer(10);
   };
 
-  const handleMouseLeave = () => {
-    setMouseMessage("マウスが離れました");
-  };
+  // -----------------------------
+  // ロン君クリック
+  // -----------------------------
+  const handleCatClick = () => {
+    if (!gameStarted || gameEnded) return;
 
-  // ジャンプイベント
-  const jump = () => {
+    setClickCount((prev) => prev + 1);
+
+    // ジャンプ演出
     if (!isJumping) {
       setIsJumping(true);
-      setTimeout(() => setIsJumping(false), 600);
+      setTimeout(() => setIsJumping(false), 300);
     }
   };
 
   // -----------------------------
-  // useEffect：マウスログ（安全）
+  // タイマー処理
   // -----------------------------
   useEffect(() => {
-    setMouseLog((prev) => [...prev, `状態: ${mouseMessage}`]);
-  }, [mouseMessage]);
+    if (!gameStarted || gameEnded) return;
+
+    if (timer === 0) {
+      finishGame();
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setTimer((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [gameStarted, timer, gameEnded]);
+
+  // -----------------------------
+  // ゲーム終了判定
+  // -----------------------------
+  const finishGame = () => {
+    setGameEnded(true);
+
+    if (clickCount === targetCount) {
+      alert("🎉 あなたの勝利です！");
+    } else {
+      alert(`😿 あなたの負けです…（あなた: ${clickCount}回 / 目標: ${targetCount}回）`);
+    }
+
+    const again = window.confirm("もう一度ゲームしますか？");
+
+    if (again) {
+      startGame();
+    } else {
+      endGame();
+    }
+  };
+
+  // -----------------------------
+  // ゲーム終了（画面クリア）
+  // -----------------------------
+  const endGame = () => {
+    setGameStarted(false);
+    setGameEnded(true);
+    setTargetCount(null);
+    setClickCount(0);
+    setTimer(10);
+  };
 
   // -----------------------------
   // UI
   // -----------------------------
   return (
     <div className="app">
-      <h1>ロン君のReactAPP作成</h1>
+      <h1>黒猫ロン君クリックゲーム</h1>
 
-      <div className="scroll-background">
-        <img
-          src="/ronkun.png"
-          alt="黒猫ロン君"
-          className={`cat-image ${isJumping ? "jump" : ""}`}
-          onClick={jump}
-        />
-      </div>
+      {/* ゲーム開始ボタン */}
+      {!gameStarted && (
+        <button onClick={startGame} className="start-btn">
+          ゲームスタート
+        </button>
+      )}
 
-      <p>※ 黒猫ロン君をクリックするとジャンプします</p>
+      {/* ゲーム中の表示 */}
+      {gameStarted && (
+        <>
+          <h2>目標クリック回数：{targetCount} 回</h2>
+          <h3>残り時間：{timer} 秒</h3>
+          <h3>あなたのクリック回数：{clickCount} 回</h3>
 
-      <section>
-        <h2>1. テキスト入力イベント（onChange）</h2>
-        <input
-          type="text"
-          value={text}
-          onChange={handleChange}
-          placeholder="文字を入力してみてください"
-        />
-        <p>入力された文字: {text}</p>
-      </section>
+          <div className="scroll-background">
+            <img
+              src="/ronkun.png"
+              alt="黒猫ロン君"
+              className={`cat-image ${isJumping ? "jump" : ""}`}
+              onClick={handleCatClick}
+            />
+          </div>
 
-      <hr />
+          <p>※ 黒猫ロン君をクリックして回数を稼いでください！</p>
+        </>
+      )}
 
-      <section>
-        <h2>2. クリックイベント（onClick）</h2>
-        <p>現在のカウント: {count}</p>
-        <button onClick={handleClick}>カウントを増やす</button>
-      </section>
-
-      <hr />
-
-      <section>
-        <h2>3. マウスイベント（onMouseEnter / onMouseLeave）</h2>
-
-        <div
-          className="hover-box"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          ホバーエリア
-        </div>
-
-        <p>{mouseMessage}</p>
-      </section>
-
-      <hr />
-
-      <section>
-        <h2>4. useEffect による監視ログ（マウスのみ）</h2>
-
-        <h3>マウスログ</h3>
-        <button onClick={() => setMouseLog([])}>マウスログをクリアする</button>
-        <ul>
-          {mouseLog.map((log, index) => (
-            <li key={index}>{log}</li>
-          ))}
-        </ul>
-      </section>
+      {/* ゲーム終了後の画面クリア */}
+      {gameEnded && !gameStarted && (
+        <p>ゲームを終了しました。</p>
+      )}
     </div>
   );
 }
