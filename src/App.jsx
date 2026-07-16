@@ -17,10 +17,10 @@ function App() {
   const handleChange = (e) => {
     setText(e.target.value);
   };
-
-  // クリックイベント（カウントアップ）
+  
+  //カウントアップ
   const handleClick = () => {
-    setCount((prev) => prev + 1);
+    setCount((c) => c + 1);
   };
 
   // マウスイベント
