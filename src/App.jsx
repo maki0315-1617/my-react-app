@@ -52,16 +52,19 @@ function App() {
       clicks,
     };
 
-    const updated = [newRecord, ...history].slice(0, 5);
+    const updated = [newRecord, ...history].slice(0, 20);
     setHistory(updated);
     localStorage.setItem("ronkun-history", JSON.stringify(updated));
   };
 
+  // 勝敗数（タイトル画面だけで使う）
+  const winCount = history.filter((h) => h.result === "勝ち").length;
+  const loseCount = history.filter((h) => h.result === "負け").length;
+
   // 勝率計算
   const winRate = (() => {
     if (history.length === 0) return 0;
-    const wins = history.filter((h) => h.result === "勝ち").length;
-    return Math.round((wins / history.length) * 100);
+    return Math.round((winCount / history.length) * 100);
   })();
 
   // ランキング
@@ -231,6 +234,10 @@ function App() {
           <button className="start-btn" onClick={startFromTitle}>
             ゲームスタート
           </button>
+
+          {/* ★ 過去の勝敗数（タイトル画面だけに表示） */}
+          <h3>過去の勝敗数</h3>
+          <p>勝ち：{winCount} 回 / 負け：{loseCount} 回</p>
         </div>
       )}
 
@@ -254,7 +261,7 @@ function App() {
         <>
           {/* 履歴テーブル */}
           <section>
-            <h2>過去の勝敗履歴（最新5件）</h2>
+            <h2>過去の勝敗履歴（最新20件）</h2>
 
             {history.length === 0 && <p>履歴はまだありません</p>}
 
