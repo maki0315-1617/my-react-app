@@ -3,11 +3,57 @@ import "./App.css";
 
 function App() {
   const [gameStarted, setGameStarted] = useState(false);
-  const [targetCount, setTargetCount] = useState(null); // ランダム回数
-  const [clickCount, setClickCount] = useState(0); // ロン君クリック回数
-  const [timer, setTimer] = useState(10); // 10秒タイマー
+  const [targetCount, setTargetCount] = useState(null);
+  const [clickCount, setClickCount] = useState(0);
+  const [timer, setTimer] = useState(10);
   const [isJumping, setIsJumping] = useState(false);
   const [gameEnded, setGameEnded] = useState(false);
+
+  // ★ localStorage の履歴
+  const [history, setHistory] = useState([]);
+
+  // -----------------------------
+  // 初回ロード時に localStorage から履歴を読み込む
+  // -----------------------------
+  useEffect(() => {
+    const saved = localStorage.getItem("ronkun-history");
+    if (saved) {
+      setHistory(JSON.parse(saved));
+    }
+  }, []);
+
+  // -----------------------------
+  // 履歴を localStorage に保存
+  // -----------------------------
+  const saveHistory = (result, target, clicks) => {
+    const newRecord = {
+      date: new Date().toLocaleString(),
+      result,
+      target,
+      clicks,
+    };
+
+    const updated = [newRecord, ...history].slice(0, 5); // 最新5件だけ保持
+    setHistory(updated);
+    localStorage.setItem("ronkun-history", JSON.stringify(updated));
+  };
+
+  // -----------------------------
+  // 勝率計算
+  // -----------------------------
+  const winRate = (() => {
+    if (history.length === 0) return 0;
+    const wins = history.filter((h) => h.result === "勝ち").length;
+    return Math.round((wins / history.length) * 100);
+  })();
+
+  // -----------------------------
+  // ランキング（勝ち数の多い順）
+  // -----------------------------
+  const ranking = (() => {
+    const wins = history.filter((h) => h.result === "勝ち");
+    return wins.sort((a, b) => b.target - a.target); // 目標回数が多い勝利を上位に
+  })();
 
   // -----------------------------
   // ゲーム開始
@@ -17,7 +63,7 @@ function App() {
     setGameEnded(false);
     setClickCount(0);
 
-    const random = Math.floor(Math.random() * 10) + 1; // 1〜10回
+    const random = Math.floor(Math.random() * 10) + 1;
     setTargetCount(random);
 
     setTimer(10);
@@ -31,7 +77,6 @@ function App() {
 
     setClickCount((prev) => prev + 1);
 
-    // ジャンプ演出
     if (!isJumping) {
       setIsJumping(true);
       setTimeout(() => setIsJumping(false), 300);
@@ -62,10 +107,14 @@ function App() {
   const finishGame = () => {
     setGameEnded(true);
 
-    if (clickCount === targetCount) {
+    const isWin = clickCount === targetCount;
+
+    if (isWin) {
       alert("🎉 あなたの勝利です！");
+      saveHistory("勝ち", targetCount, clickCount);
     } else {
       alert(`😿 あなたの負けです…（あなた: ${clickCount}回 / 目標: ${targetCount}回）`);
+      saveHistory("負け", targetCount, clickCount);
     }
 
     const again = window.confirm("もう一度ゲームしますか？");
@@ -95,6 +144,52 @@ function App() {
     <div className="app">
       <h1>黒猫ロン君クリックゲーム</h1>
 
+      {/* ★ 履歴テーブル表示 */}
+      <section>
+        <h2>過去の勝敗履歴（最新5件）</h2>
+
+        {history.length === 0 && <p>履歴はまだありません</p>}
+
+        {history.length > 0 && (
+          <table border="1" style={{ width: "100%", marginBottom: "20px" }}>
+            <thead>
+              <tr>
+                <th>日時</th>
+                <th>勝敗</th>
+                <th>目標回数</th>
+                <th>クリック回数</th>
+              </tr>
+            </thead>
+            <tbody>
+              {history.map((h, index) => (
+                <tr key={index}>
+                  <td>{h.date}</td>
+                  <td>{h.result}</td>
+                  <td>{h.target}</td>
+                  <td>{h.clicks}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        {/* ★ 勝率表示 */}
+        <h3>勝率：{winRate}%</h3>
+
+        {/* ★ ランキング表示 */}
+        <h2>勝利ランキング（目標回数が多い順）</h2>
+        {ranking.length === 0 && <p>勝利履歴がありません</p>}
+        {ranking.length > 0 && (
+          <ul>
+            {ranking.map((r, index) => (
+              <li key={index}>
+                {index + 1}位：{r.date} / 目標 {r.target}回 / 達成 {r.clicks}回
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
       {/* ゲーム開始ボタン */}
       {!gameStarted && (
         <button onClick={startGame} className="start-btn">
@@ -122,10 +217,7 @@ function App() {
         </>
       )}
 
-      {/* ゲーム終了後の画面クリア */}
-      {gameEnded && !gameStarted && (
-        <p>ゲームを終了しました。</p>
-      )}
+      {gameEnded && !gameStarted && <p>ゲームを終了しました。</p>}
     </div>
   );
 }
