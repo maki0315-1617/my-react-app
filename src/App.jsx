@@ -1,5 +1,5 @@
 // ロン君のReactAPP作成
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 
 function App() {
@@ -21,22 +21,28 @@ function App() {
   // ジャンプ状態
   const [isJumping, setIsJumping] = useState(false);
 
+  // 前回の入力値を保持（別方式のポイント）
+  const prevTextRef = useRef("");
+
   // -----------------------------
   // イベントハンドラ
   // -----------------------------
 
-  // テキスト入力イベント（修正版）
+  // テキスト入力イベント（別方式）
   const handleChange = (e) => {
     const value = e.target.value;
     setText(value);
 
-    // 入力が空でない場合のみカウントアップ
-    if (value.trim() !== "") {
-      setCount((prevCount) => prevCount + 1);
+    // 前回値と比較して変化があればカウントアップ
+    if (value !== prevTextRef.current && value.trim() !== "") {
+      setCount((prev) => prev + 1);
     }
+
+    // 前回値を更新
+    prevTextRef.current = value;
   };
 
-  // クリックイベント（修正版）
+  // クリックイベント
   const handleClick = () => {
     setCount((prevCount) => prevCount + 1);
   };
@@ -64,15 +70,15 @@ function App() {
   const jump = () => {
     if (!isJumping) {
       setIsJumping(true);
-      setTimeout(() => setIsJumping(false), 600); // ジャンプ時間
+      setTimeout(() => setIsJumping(false), 600);
     }
   };
 
   // -----------------------------
-  // useEffect：入力監視（修正版）
+  // useEffect：入力監視（暴走しない別方式）
   // -----------------------------
   useEffect(() => {
-    if (text && text.trim() !== "") {
+    if (text.trim() !== "") {
       setInputLog((prev) => [...prev, `入力: ${text}`]);
     }
   }, [text]);
@@ -91,9 +97,7 @@ function App() {
     <div className="app">
       <h1>ロン君のReactAPP作成</h1>
 
-      {/* 冒険風スクロール背景 */}
       <div className="scroll-background">
-        {/* 黒猫ロン君 */}
         <img
           src="/ronkun.png"
           alt="黒猫ロン君"
@@ -104,7 +108,6 @@ function App() {
 
       <p>※ 黒猫ロン君をクリックするとジャンプします</p>
 
-      {/* テキスト入力イベント */}
       <section>
         <h2>1. テキスト入力イベント（onChange）</h2>
         <input
@@ -118,7 +121,6 @@ function App() {
 
       <hr />
 
-      {/* クリックイベント */}
       <section>
         <h2>2. クリックイベント（onClick）</h2>
         <p>現在のカウント: {count}</p>
@@ -127,7 +129,6 @@ function App() {
 
       <hr />
 
-      {/* マウスイベント */}
       <section>
         <h2>3. マウスイベント（onMouseEnter / onMouseLeave）</h2>
 
@@ -144,7 +145,6 @@ function App() {
 
       <hr />
 
-      {/* useEffect ログ表示 */}
       <section>
         <h2>4. useEffect による監視ログ</h2>
 
