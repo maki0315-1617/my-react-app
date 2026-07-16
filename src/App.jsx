@@ -18,6 +18,9 @@ function App() {
   // マウス監視ログ
   const [mouseLog, setMouseLog] = useState([]);
 
+  // ジャンプ状態
+  const [isJumping, setIsJumping] = useState(false);
+
   // -----------------------------
   // イベントハンドラ
   // -----------------------------
@@ -46,6 +49,19 @@ function App() {
     setInputLog([]);
   };
 
+  // マウスログをクリアするイベント
+  const clearMouseLog = () => {
+    setMouseLog([]);
+  };
+
+  // ジャンプイベント
+  const jump = () => {
+    if (!isJumping) {
+      setIsJumping(true);
+      setTimeout(() => setIsJumping(false), 600); // ジャンプ時間
+    }
+  };
+
   // -----------------------------
   // useEffect：入力監視
   // -----------------------------
@@ -69,14 +85,18 @@ function App() {
     <div className="app">
       <h1>ロン君のReactAPP作成</h1>
 
-      {/* 黒猫ロン君の歩行アニメーション */}
-      <div className="cat-area">
+      {/* 冒険風スクロール背景 */}
+      <div className="scroll-background">
+        {/* 黒猫ロン君 */}
         <img
-          src="/Copilot_20260716_132538.png"
+          src="/ronkun.png"
           alt="黒猫ロン君"
-          className="cat-image"
+          className={`cat-image ${isJumping ? "jump" : ""}`}
+          onClick={jump}
         />
       </div>
+
+      <p>※ 黒猫ロン君をクリックするとジャンプします</p>
 
       {/* テキスト入力イベント */}
       <section>
@@ -131,6 +151,7 @@ function App() {
         </ul>
 
         <h3>マウスログ</h3>
+        <button onClick={clearMouseLog}>マウスログをクリアする</button>
         <ul>
           {mouseLog.map((log, index) => (
             <li key={index}>{log}</li>
