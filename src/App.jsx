@@ -70,7 +70,7 @@ function App() {
     return wins.sort((a, b) => b.target - a.target);
   })();
 
-  // 偽物ロン君生成（CSSアニメーションで左→右へ移動）
+  // 偽物ロン君生成（左→右へ移動）
   const spawnFakeCat = () => {
     const id = Math.random().toString(36).substring(2, 9);
 
@@ -188,23 +188,23 @@ function App() {
     }
 
     setShowResult(true);
-
-    // 3秒後にタイトル画面へ戻る
-    setTimeout(() => {
-      endGame();
-    }, 3000);
   };
 
-  // ゲーム終了
-  const endGame = () => {
+  // タイトル画面へ戻る
+  const goToTitle = () => {
+    setShowResult(false);
+    setShowTitle(true);
     setGameStarted(false);
-    setGameEnded(true);
-    setTargetCount(null);
+    setGameEnded(false);
     setClickCount(0);
     setTimer(10);
     setFakeCats([]);
+  };
+
+  // ゲームを続ける
+  const continueGame = () => {
     setShowResult(false);
-    setShowTitle(true);
+    startGame();
   };
 
   return (
@@ -238,7 +238,14 @@ function App() {
       {showResult && (
         <div className="result-screen">
           <h2>{resultMessage}</h2>
-          <p>3秒後にタイトル画面へ戻ります…</p>
+
+          <button className="result-btn" onClick={goToTitle}>
+            OK（タイトルへ戻る）
+          </button>
+
+          <button className="result-btn-continue" onClick={continueGame}>
+            ゲームを続ける
+          </button>
         </div>
       )}
 

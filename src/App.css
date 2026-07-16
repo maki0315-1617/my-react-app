@@ -45,6 +45,24 @@
   font-size: 1.4rem;
 }
 
+.result-btn,
+.result-btn-continue {
+  padding: 12px 20px;
+  font-size: 1.2rem;
+  margin: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.result-btn {
+  background: #ffd700;
+}
+
+.result-btn-continue {
+  background: #66ccff;
+}
+
 /* 冒険風スクロール背景 */
 .scroll-background {
   width: 100%;
