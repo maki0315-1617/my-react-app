@@ -25,15 +25,21 @@ function App() {
   // イベントハンドラ
   // -----------------------------
 
-  // テキスト入力イベント
+  // テキスト入力イベント（修正版）
   const handleChange = (e) => {
-    setText(e.target.value);
+    const value = e.target.value;
+    setText(value);
+
+    // 入力が空でない場合のみカウントアップ
+    if (value.trim() !== "") {
+      setCount((prevCount) => prevCount + 1);
+    }
   };
 
-  // クリックイベント
+  // クリックイベント（修正版）
   const handleClick = () => {
     setCount((prevCount) => prevCount + 1);
-  };  
+  };
 
   // マウスイベント
   const handleMouseEnter = () => {
@@ -63,10 +69,10 @@ function App() {
   };
 
   // -----------------------------
-  // useEffect：入力監視
+  // useEffect：入力監視（修正版）
   // -----------------------------
   useEffect(() => {
-    if (text !== "") {
+    if (text && text.trim() !== "") {
       setInputLog((prev) => [...prev, `入力: ${text}`]);
     }
   }, [text]);
