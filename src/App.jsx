@@ -5,6 +5,10 @@ function App() {
   // タイトル画面
   const [showTitle, setShowTitle] = useState(true);
 
+  // 結果画面
+  const [showResult, setShowResult] = useState(false);
+  const [resultMessage, setResultMessage] = useState("");
+
   // ゲーム状態
   const [gameStarted, setGameStarted] = useState(false);
   const [gameEnded, setGameEnded] = useState(false);
@@ -125,6 +129,7 @@ function App() {
   const startGame = () => {
     setGameStarted(true);
     setGameEnded(false);
+    setShowResult(false);
     setClickCount(0);
 
     const random = Math.floor(Math.random() * 10) + 1;
@@ -175,20 +180,19 @@ function App() {
     const isWin = clickCount === targetCount;
 
     if (isWin) {
-      alert("🎉 あなたの勝利です！");
+      setResultMessage(`🎉 勝ち！ 目標 ${targetCount} 回 / あなた ${clickCount} 回`);
       saveHistory("勝ち", targetCount, clickCount);
     } else {
-      alert(`😿 あなたの負けです…（あなた: ${clickCount}回 / 目標: ${targetCount}回）`);
+      setResultMessage(`😿 負け… 目標 ${targetCount} 回 / あなた ${clickCount} 回`);
       saveHistory("負け", targetCount, clickCount);
     }
 
-    const again = window.confirm("もう一度ゲームしますか？");
+    setShowResult(true);
 
-    if (again) {
-      startGame();
-    } else {
+    // 3秒後にタイトル画面へ戻る
+    setTimeout(() => {
       endGame();
-    }
+    }, 3000);
   };
 
   // ゲーム終了
@@ -199,6 +203,7 @@ function App() {
     setClickCount(0);
     setTimer(10);
     setFakeCats([]);
+    setShowResult(false);
     setShowTitle(true);
   };
 
@@ -206,7 +211,7 @@ function App() {
     <div className="app">
 
       {/* タイトル画面 */}
-      {showTitle && (
+      {showTitle && !showResult && (
         <div className="title-screen">
           <h1 className="title-logo">黒猫ロン君クリックゲーム</h1>
 
@@ -229,8 +234,16 @@ function App() {
         </div>
       )}
 
+      {/* 結果画面 */}
+      {showResult && (
+        <div className="result-screen">
+          <h2>{resultMessage}</h2>
+          <p>3秒後にタイトル画面へ戻ります…</p>
+        </div>
+      )}
+
       {/* ゲーム画面 */}
-      {!showTitle && (
+      {!showTitle && !showResult && (
         <>
           {/* 履歴テーブル */}
           <section>
@@ -295,16 +308,9 @@ function App() {
                   alt="黒猫ロン君"
                   className={`cat-image ${isJumping ? "jump" : ""}`}
                   onClick={handleCatClick}
-                  style={{
-                    width: window.innerWidth < 600 ? "80px" : "120px",
-                    cursor: "pointer",
-                    position: "absolute",
-                    left: "20px",
-                    bottom: "20px",
-                  }}
                 />
 
-                {/* 偽物ロン君（CSSアニメーションで左→右へ移動） */}
+                {/* 偽物ロン君 */}
                 {fakeCats.map((cat) => (
                   <img
                     key={cat.id}
@@ -312,10 +318,8 @@ function App() {
                     alt="偽物ロン君"
                     className={`fake-cat move-left-right ${cat.jumping ? "jump" : ""}`}
                     style={{
-                      position: "absolute",
                       top: cat.top,
                       width: window.innerWidth < 600 ? "60px" : "80px",
-                      cursor: "pointer",
                     }}
                     onClick={handleFakeCatClick}
                   />
@@ -325,8 +329,6 @@ function App() {
               <p>※ 黒猫ロン君をクリックして回数を稼いでください！</p>
             </>
           )}
-
-          {gameEnded && !gameStarted && <p>ゲームを終了しました。</p>}
         </>
       )}
     </div>
